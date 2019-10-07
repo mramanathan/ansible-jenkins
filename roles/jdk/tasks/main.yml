@@ -1,0 +1,6 @@
+---
+  - name: Install JDK v8
+    apt:
+      state: present
+      pkg:
+        - "openjdk-8-jdk"
