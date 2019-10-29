@@ -27,9 +27,11 @@
     apt:
       update_cache: yes
   
-  - name: Download specific version of Jenkins
-    get_url:
-      url: "https://pkg.jenkins.io/debian-stable/{{ jenkins_version }}.deb"
+  #- name: Download specific version of Jenkins
+  #  get_url:
+  #    url: "https://pkg.jenkins.io/debian-stable/binary/jenkins_{{ jenkins_version }}_all.deb"
+  #    dest: /tmp/jenkins_{{ jenkins_version }}.deb
+
   - name: Install jenkins package
     apt:
       state: present
@@ -42,7 +44,7 @@
       line: "JENKINS_HOME={{ jenkins_home }}"
       regexp: '^JENKINS_HOME='
 
-- name: Set Jenkins port
+  - name: Set Jenkins port
     lineinfile:
       dest: /etc/default/jenkins
       regexp: '^HTTP_PORT='
