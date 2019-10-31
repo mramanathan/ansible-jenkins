@@ -1,0 +1,19 @@
+---
+  - name: bootstrap
+    hosts: localhost
+    connection: local
+    become: true
+    become_method: sudo
+    become_flags: -E
+    user: ubuntu
+    vars:
+      ipv4_address: "{{ ansible_ec2_public_ipv4 }}"
+    pre_tasks:
+    post_tasks:
+    roles:
+      - { role: 'base' }
+      - { role: 'jdk' }
+      - role: 'jenkins'
+        vars:
+          jenkins_version: 2.176.3
+          jenkins_port: 8080

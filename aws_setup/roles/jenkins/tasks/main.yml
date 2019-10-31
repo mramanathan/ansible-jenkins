@@ -1,0 +1,51 @@
+---
+  - name: Create jenkins group
+    group:
+      name: "{{ jenkins_config_group }}"
+      state: present
+  
+  - name: Create jenkins user
+    user:
+      name: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+      home: "{{ jenkins_home }}"
+      shell: /bin/false
+      state: present
+  
+  - name: Add Jenkins Key
+    apt_key:
+      url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+      state: present
+
+  - name: Add Jenkins stable repo
+    apt_repository:
+      repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+      state: present
+      filename: jenkins
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+  
+  #- name: Download specific version of Jenkins
+  #  get_url:
+  #    url: "https://pkg.jenkins.io/debian-stable/binary/jenkins_{{ jenkins_version }}_all.deb"
+  #    dest: /tmp/jenkins_{{ jenkins_version }}.deb
+
+  - name: Install jenkins package
+    apt:
+      state: present
+      pkg:
+        - "jenkins={{ jenkins_version }}"
+
+  - name: Set JENKINS_HOME
+    lineinfile:
+      dest: /etc/default/jenkins
+      line: "JENKINS_HOME={{ jenkins_home }}"
+      regexp: '^JENKINS_HOME='
+
+  - name: Set Jenkins port
+    lineinfile:
+      dest: /etc/default/jenkins
+      regexp: '^HTTP_PORT='
+      line: "HTTP_PORT={{ jenkins_port }}"
