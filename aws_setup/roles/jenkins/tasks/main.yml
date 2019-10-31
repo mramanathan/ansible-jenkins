@@ -37,7 +37,8 @@
       state: present
       pkg:
         - "jenkins={{ jenkins_version }}"
-
+      enabled: no
+  
   - name: Set JENKINS_HOME
     lineinfile:
       dest: /etc/default/jenkins
@@ -49,3 +50,31 @@
       dest: /etc/default/jenkins
       regexp: '^HTTP_PORT='
       line: "HTTP_PORT={{ jenkins_port }}"
+
+  - name: Set Jenkins to start automatically on boot
+    service:
+      name: jenkins
+      state: present
+      enabled: yes
+
+  - name: Copy the startup files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode }}"
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+    with_items:
+      - { src: "init.groovy.d/",      dest: "/etc/jenkins/init.groovy.d/", mode: "0644" }
+      - { src: "jenkins/plugins.txt", dest: "/etc/jenkins/plugins.txt",    mode: "0644" }
+
+  - name: Copy in Jenkins system files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode }}"
+      owner: root
+      group: root
+    with_items:
+      - { src: "jenkins/install-plugins.sh",     dest: "/usr/local/bin/install-plugins.sh",      mode: "0750" }
+      - { src: "jenkins/jenkins-logrotate",      dest: "/etc/logrotate.d/jenkins",               mode: "0640" }
