@@ -1,0 +1,16 @@
+---
+jenkins_home: /opt/jenkins/jenkins_home
+jenkins_init_file: /etc/default/jenkins
+
+jenkins_config_owner: jenkins
+jenkins_config_group: "{{ jenkins_config_owner }}"
+
+jenkins_admin_username: admin
+jenkins_admin_password: admin
+
+# Discussion thread from 2016 -- https://groups.google.com/forum/#!topic/jenkinsci-users/Pb4QZVc2-f0
+jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
+
+jenkins_init_changes:
+  - option: "{{ jenkins_java_options_env_var }}"
+    value: "{{ jenkins_java_options }}"

@@ -1,4 +1,0 @@
----
-jenkins_home: /var/jenkins_home
-jenkins_config_owner: jenkins
-jenkins_config_group: jenkins

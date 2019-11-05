@@ -1,0 +1,62 @@
+---
+- name: Check if jenkins_init_file exists.
+  stat:
+    path: "{{ jenkins_init_file }}"
+  register: jenkins_init_file_stat
+
+- name: Ensure jenkins_init_file exists.
+  file:
+    path: "{{ jenkins_init_file }}"
+    state: touch
+  when: not jenkins_init_file_stat.stat.exists
+
+- name: Set JENKINS_HOME
+  lineinfile:
+    dest: "{{ jenkins_init_file }}"
+    regexp: '^JENKINS_HOME=.*'
+    line: "JENKINS_HOME={{ jenkins_home }}"
+
+- name: Set Jenkins port
+  lineinfile:
+    dest: "{{ jenkins_init_file }}"
+    regexp: '^HTTP_PORT='
+    line: "HTTP_PORT={{ jenkins_port }}"
+
+- name: Ensure jenkins_home {{ jenkins_home }} exists
+  file:
+    path: "{{ jenkins_home }}"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: u+rwx
+    follow: true
+
+- name: Create custom init scripts directory.
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d"
+    state: directory
+    owner: "{{ jenkins_config_user }}"
+    group: "{{ jenkins_config_group }}"
+    mode: 0775
+
+  - name: Copy Jenkins startup files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode }}"
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+    with_items:
+      - { src: "init.groovy.d/",      dest: "/etc/jenkins/init.groovy.d/", mode: "0644" }
+      - { src: "jenkins/plugins.txt", dest: "/etc/jenkins/plugins.txt",    mode: "0644" }
+
+  - name: Copy Jenkins system files
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode }}"
+      owner: root
+      group: root
+    with_items:
+      - { src: "jenkins/install-plugins.sh",     dest: "/usr/local/bin/install-plugins.sh",      mode: "0750" }
+      - { src: "jenkins/jenkins-logrotate",      dest: "/etc/logrotate.d/jenkins",               mode: "0640" }

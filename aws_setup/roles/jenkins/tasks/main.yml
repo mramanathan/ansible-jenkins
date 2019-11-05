@@ -27,59 +27,16 @@
     apt:
       update_cache: yes
   
-  #- name: Download specific version of Jenkins
-  #  get_url:
-  #    url: "https://pkg.jenkins.io/debian-stable/binary/jenkins_{{ jenkins_version }}_all.deb"
-  #    dest: /tmp/jenkins_{{ jenkins_version }}.deb
+  - name: Download specific version of Jenkins
+    get_url:
+      url: "https://pkg.jenkins.io/debian-stable/binary/jenkins_{{ jenkins_version }}_all.deb"
+      dest: /tmp/jenkins_{{ jenkins_version }}_all.deb
 
-  - name: Install jenkins package
+  - name: Install specific version of Jenkins
     apt:
+      deb: /tmp/jenkins_{{ jenkins_version }}_all.deb
       state: present
-      pkg:
-        - "jenkins={{ jenkins_version }}"
+    notify: setup admin user
   
-  - name: Set JENKINS_HOME
-    lineinfile:
-      dest: /etc/default/jenkins
-      line: "JENKINS_HOME={{ jenkins_home }}"
-      regexp: '^JENKINS_HOME='
-
-  - name: Set Jenkins port
-    lineinfile:
-      dest: /etc/default/jenkins
-      regexp: '^HTTP_PORT='
-      line: "HTTP_PORT={{ jenkins_port }}"
-
-  - name: Set Jenkins to start automatically on boot
-    service:
-      name: jenkins
-      state: stopped
-      enabled: yes
-
-  - name: Copy Jenkins startup files
-    copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      mode: "{{ item.mode }}"
-      owner: "{{ jenkins_config_owner }}"
-      group: "{{ jenkins_config_group }}"
-    with_items:
-      - { src: "init.groovy.d/",      dest: "/etc/jenkins/init.groovy.d/", mode: "0644" }
-      - { src: "jenkins/plugins.txt", dest: "/etc/jenkins/plugins.txt",    mode: "0644" }
-
-  - name: Copy Jenkins system files
-    copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      mode: "{{ item.mode }}"
-      owner: root
-      group: root
-    with_items:
-      - { src: "jenkins/install-plugins.sh",     dest: "/usr/local/bin/install-plugins.sh",      mode: "0750" }
-      - { src: "jenkins/jenkins-logrotate",      dest: "/etc/logrotate.d/jenkins",               mode: "0640" }
-
-  - name: Set Jenkins to start automatically on boot
-    service:
-      name: jenkins
-      state: restarted
-      enabled: yes
+  # Customize Jenkins settings
+  - include_tasks: settings.yml
