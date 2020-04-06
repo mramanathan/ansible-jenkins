@@ -2,3 +2,8 @@
 jenkins_home: /var/jenkins_home
 jenkins_config_owner: jenkins
 jenkins_config_group: jenkins
+jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
+
+jenkins_init_changes:
+  - option: "{{ jenkins_java_options_env_var }}"
+    value: "{{ jenkins_java_options }}"

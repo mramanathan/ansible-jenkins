@@ -40,12 +40,64 @@
 
   - name: Set JENKINS_HOME
     lineinfile:
-      dest: /etc/default/jenkins
+      dest: "{{ jenkins_init_file }}"
       line: "JENKINS_HOME={{ jenkins_home }}"
       regexp: '^JENKINS_HOME='
 
   - name: Set Jenkins port
     lineinfile:
-      dest: /etc/default/jenkins
+      dest: "{{ jenkins_init_file }}"
       regexp: '^HTTP_PORT='
       line: "HTTP_PORT={{ jenkins_port }}"
+
+  - name: Prep initial setup -- push preset global config
+    copy:
+      src: core/config.xml
+      dest: "{{ jenkins_home }}"
+      mode: 0644
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+
+  - name: Prep initial setup -- push groovy scripts for basic system setup
+    copy:
+      src: init.groovy.d
+      dest: "{{ jenkins_home }}"
+      mode: 0644
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+
+  - name: Turn off Jenkins setup wizard
+    lineinfile:
+      dest: "{{ jenkins_init_file }}"
+      regexp: '^JAVA_ARGS='
+      line: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+      insertbefore: '^DAEMON_ARGS='
+    notify: 
+      - restart_jenkins
+
+  - name: Wait until Jenkins restart is complete
+    wait_for:
+      port: "{{ jenkins_port }}"
+      timeout: 300
+
+  - name: Purge setup wizard Groovy
+    file:
+      path: "{{ jenkins_home }}/init.groovy.d/basic-security.groovy"
+      state: absent
+
+  - name: Push pre-configured job configs
+    copy:
+      src: jobs
+      dest: "{{ jenkins_home }}"
+      mode: 0644
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+
+  - name: Push pre-configured build agent config
+    copy:
+      src: nodes
+      dest: "{{ jenkins_home }}"
+      mode: 0644
+      owner: "{{ jenkins_config_owner }}"
+      group: "{{ jenkins_config_group }}"
+

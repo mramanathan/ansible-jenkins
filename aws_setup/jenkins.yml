@@ -10,10 +10,14 @@
       ipv4_address: "{{ ansible_ec2_public_ipv4 }}"
     pre_tasks:
     post_tasks:
+    environment:
+      JENKINS_ADMIN_USER: admin
+      JENKINS_ADMIN_PASS: admin
     roles:
       - { role: 'base' }
-      - { role: 'jdk' }
+      - { role: 'jdk'  }
       - role: 'jenkins'
         vars:
           jenkins_version: 2.176.3
           jenkins_port: 8080
+          jenkins_url: "http://localhost"

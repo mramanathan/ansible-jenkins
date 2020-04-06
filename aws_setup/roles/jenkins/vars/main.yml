@@ -1,0 +1,3 @@
+---
+jenkins_init_file: /etc/default/jenkins
+jenkins_java_options_env_var: JAVA_ARGS
