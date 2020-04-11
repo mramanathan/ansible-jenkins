@@ -1,11 +1,17 @@
 ---
   - name: bootstrap
     hosts: localhost
+    gather_facts: false
     connection: local
     become: true
     become_method: sudo
     become_flags: -E
     user: ubuntu
+    vars_prompt:
+      - name: "jenkins_version"
+        prompt: Provide the version of Jenkins to install, default shall be 
+        default : 2.204.2
+        private: no
     vars:
       ipv4_address: "{{ ansible_ec2_public_ipv4 }}"
     pre_tasks:
@@ -18,6 +24,5 @@
       - { role: 'jdk'  }
       - role: 'jenkins'
         vars:
-          jenkins_version: 2.176.3
           jenkins_port: 8080
           jenkins_url: "http://localhost"
