@@ -12,6 +12,11 @@
       shell: /bin/false
       state: present
   
+  - name: Add an apt key by id from a keyserver
+    apt_key:
+      keyserver: keyserver.ubuntu.com
+      id: 9B7D32F2D50582E6
+
   - name: Add Jenkins Key
     apt_key:
       url: "https://pkg.jenkins.io/debian/jenkins.io.key"
@@ -84,14 +89,6 @@
     file:
       path: "{{ jenkins_home }}/init.groovy.d/basic-security.groovy"
       state: absent
-
-  - name: Push pre-configured job configs
-    copy:
-      src: jobs
-      dest: "{{ jenkins_home }}"
-      mode: 0644
-      owner: "{{ jenkins_config_owner }}"
-      group: "{{ jenkins_config_group }}"
 
   - name: Push pre-configured build agent config
     copy:
