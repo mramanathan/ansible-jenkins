@@ -12,21 +12,16 @@
       shell: /bin/false
       state: present
   
-  - name: Add an apt key by id from a keyserver
+  - name: Add Jenkins key repo 
     apt_key:
-      keyserver: keyserver.ubuntu.com
-      id: 9B7D32F2D50582E6
-
-  - name: Add Jenkins Key
-    apt_key:
-      url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+      url: http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key
       state: present
 
   - name: Add Jenkins stable repo
     apt_repository:
-      repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+      repo: 'deb http://pkg.jenkins-ci.org/debian-stable binary/'
       state: present
-      filename: jenkins
+      filename: jenkins.list
 
   - name: Update apt cache
     apt:
